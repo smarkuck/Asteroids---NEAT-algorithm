@@ -6,31 +6,33 @@ SCREEN_HEIGHT = 600
 SHORT_SIDE = SCREEN_WIDTH if SCREEN_WIDTH < SCREEN_HEIGHT else SCREEN_HEIGHT
 
 class Ship:
-    x = SCREEN_WIDTH/2
-    y = SCREEN_HEIGHT/2
+    x = SCREEN_WIDTH / 2
+    y = SCREEN_HEIGHT / 2
     angle = 90
     angleBetweenRearIndices = 70
-    radius = 0.05*SHORT_SIDE
-    acceleration = 0.0005*SHORT_SIDE
-    max_speed = 0.02*SHORT_SIDE
-    speed = 0
+    radius = 0.05 * SHORT_SIDE
+    acceleration = 0.0005 * SHORT_SIDE
+    max_velocity = 0.02 * SHORT_SIDE
+    velocity = pygame.math.Vector2()
 
     def rotateLeft(self):
-        self.angle += 2
+        self.angle += 5
 
     def rotateRight(self):
-        self.angle += -2
+        self.angle += -5
 
     def boost(self):
-        self.speed = min(self.max_speed, self.speed + self.acceleration)
+        self.velocity += pygame.math.Vector2(math.cos(math.radians(self.angle)), math.sin(math.radians(self.angle))) * self.acceleration
+        if self.velocity.length() > self.max_velocity:
+            self.velocity = self.velocity.normalize() * self.max_velocity
 
     def shoot(self):
         return Bullet(self.x + self.radius*math.cos(math.radians(self.angle)), self.y + self.radius*math.sin(math.radians(self.angle)), self.angle)
 
     def update(self):
-        self.speed *= 0.98
-        self.x += math.cos(math.radians(self.angle)) * self.speed
-        self.y += math.sin(math.radians(self.angle)) * self.speed
+        self.velocity *= 0.98
+        self.x += self.velocity.x
+        self.y += self.velocity.y
         self.boundary()
 
     def boundary(self):
@@ -41,15 +43,15 @@ class Ship:
         elif self.y < -self.radius: self.y = SCREEN_HEIGHT + self.radius
 
     def draw(self):
-        angleBetweenFrontAndRearIndices = 180 - self.angleBetweenRearIndices/2.
+        angleBetweenFrontAndRearIndices = 180 - self.angleBetweenRearIndices / 2.
         p1 = (self.x + self.radius*math.cos(math.radians(self.angle)), SCREEN_HEIGHT - self.y - self.radius*math.sin(math.radians(self.angle)))
         p2 = (self.x + self.radius*math.cos(math.radians(self.angle+angleBetweenFrontAndRearIndices)), SCREEN_HEIGHT - self.y - self.radius*math.sin(math.radians(self.angle+angleBetweenFrontAndRearIndices)))
         p3 = (self.x + self.radius*math.cos(math.radians(self.angle-angleBetweenFrontAndRearIndices)), SCREEN_HEIGHT - self.y - self.radius*math.sin(math.radians(self.angle-angleBetweenFrontAndRearIndices)))
-        pygame.draw.polygon(screen, (255,255,255), (p1, p2, p3), 1)
+        pygame.draw.polygon(screen, (255, 255, 255), (p1, p2, p3), 1)
 
 class Bullet:
-    speed = 0.025*SHORT_SIDE
-    radius = 0.005*SHORT_SIDE
+    speed = 0.025 * SHORT_SIDE
+    radius = 0.005 * SHORT_SIDE
     life = 35
 
     def __init__(self, x, y, angle):
@@ -58,7 +60,7 @@ class Bullet:
         self.angle = angle
 
     def draw(self):
-        pygame.draw.circle(screen, (255,255,255), (int(self.x), int(SCREEN_HEIGHT - self.y)), int(self.radius))
+        pygame.draw.circle(screen, (255, 255, 255), (int(self.x), int(SCREEN_HEIGHT - self.y)), int(self.radius))
 
     def update(self):
         self.x += math.cos(math.radians(self.angle)) * self.speed

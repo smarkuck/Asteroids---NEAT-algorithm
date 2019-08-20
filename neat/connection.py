@@ -1,11 +1,11 @@
 import random
 
 class Connecton:
-    def __init__(self, inputNode, outputNode, weight, innovation):
+    def __init__(self, inputNode, outputNode, weight, innovationNumber):
         self.inputNode = inputNode
         self.outputNode = outputNode
         self.weight = weight
-        self.innovation = innovation
+        self.innovationNumber = innovationNumber
         self.isEnabled = True
 
     def mutate(self):
@@ -14,6 +14,6 @@ class Connecton:
         else: self.weight += random.gauss(0, 1) / 50.
 
     def clone(self, inputNode, outputNode):
-        connection = Connecton(inputNode, outputNode, self.weight, self.innovation)
+        connection = Connecton(inputNode, outputNode, self.weight, self.innovationNumber)
         connection.isEnabled = True
         return connection

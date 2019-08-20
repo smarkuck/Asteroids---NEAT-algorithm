@@ -17,6 +17,7 @@ class Ship:
         self.position = pygame.math.Vector2(position)
         self.rotation = 90
         self.velocity = pygame.math.Vector2()
+        self.alive = True
 
         self.vertices = []
         for i in range(3): self.vertices.append(pygame.math.Vector2())
@@ -45,6 +46,7 @@ class Ship:
         return Bullet(self.vertices[0], self.rotation, self.SCALE)
 
     def draw(self, screen):
+        if not self.alive: return
         verticesOnScreen = [tools.screenCoords(vertex) for vertex in self.vertices]
         pygame.draw.polygon(screen, colors.white, verticesOnScreen, self.LINE_WIDTH)
 
@@ -53,3 +55,6 @@ class Ship:
         self.position += self.velocity
         self.position = tools.boundaryLoop(self.position, self.RADIUS)
         self.updateVertices()
+
+    def destroy(self):
+        self.alive = False

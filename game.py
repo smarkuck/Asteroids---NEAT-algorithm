@@ -9,6 +9,7 @@ from collision_system import CollisionSystem
 
 class Game:
     def __init__(self, genome, isRendered):
+        self.score = 0
         self.isRendered = isRendered
         if genome is None:
             self.playerIsHuman = True
@@ -39,7 +40,7 @@ class Game:
         asteroids.append(Asteroid(pygame.math.Vector2(0, SCREEN_HEIGHT), 3, SHORT_SIDE * 0.1))
         asteroids.append(Asteroid(pygame.math.Vector2(SCREEN_WIDTH, 0), 3, SHORT_SIDE * 0.1))
 
-        collisionSystem = CollisionSystem(ship, asteroids, bullets)
+        collisionSystem = CollisionSystem(self, ship, asteroids, bullets)
 
         while not done:
             bullets[:] = [bullet for bullet in bullets if bullet.alive]
@@ -97,8 +98,10 @@ class Game:
                 pygame.display.flip()
                 clock.tick(60)
 
+        return self.score
+
 g = Genome(51, 4)
 g.connectNodes()
 
-game = Game.forAI(g)
-game.run()
+game = Game.forAI(g, False)
+print game.run()

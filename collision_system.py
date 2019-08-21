@@ -1,7 +1,8 @@
 import pygame
 
 class CollisionSystem:
-    def __init__(self, ship, asteroids, bullets):
+    def __init__(self, game, ship, asteroids, bullets):
+        self.game = game
         self.ship = ship
         self.asteroids = asteroids
         self.bullets = bullets
@@ -19,3 +20,4 @@ class CollisionSystem:
                     bullet.position.distance_to(asteroid.position) < (asteroid.RADIUS + bullet.RADIUS):
                     self.asteroids.extend(asteroid.destroy())
                     bullet.destroy()
+                    self.game.score += 1

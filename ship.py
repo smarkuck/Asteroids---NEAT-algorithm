@@ -13,11 +13,13 @@ class Ship:
         self.MAX_VELOCITY = 0.2 * scale
         self.DECELERATION_RATE = 0.98
         self.ROTATION_SPEED = 5
+        self.SHOOT_COOLDOWN = 20
 
         self.position = pygame.math.Vector2(position)
         self.rotation = 90
         self.velocity = pygame.math.Vector2()
         self.alive = True
+        self.cooldown = 0
 
         self.vertices = []
         for i in range(3): self.vertices.append(pygame.math.Vector2())
@@ -43,7 +45,11 @@ class Ship:
             self.velocity = self.velocity.normalize() * self.MAX_VELOCITY
 
     def shoot(self):
-        return Bullet(self.vertices[0], self.rotation, self.SCALE)
+        if self.cooldown < 0 and self.alive:
+            self.cooldown = self.SHOOT_COOLDOWN
+            return [Bullet(self.vertices[0], self.rotation, self.SCALE)]
+        else:
+            return []
 
     def draw(self, screen):
         if not self.alive: return
@@ -55,6 +61,7 @@ class Ship:
         self.position += self.velocity
         self.position = tools.boundaryLoop(self.position, self.RADIUS)
         self.updateVertices()
+        self.cooldown -= 1
 
     def destroy(self):
         self.alive = False

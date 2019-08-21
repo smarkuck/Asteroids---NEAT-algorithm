@@ -25,7 +25,7 @@ asteroids.append(Asteroid(pygame.math.Vector2(SCREEN_WIDTH, 0), 3, SHORT_SIDE * 
 
 collisionSystem = CollisionSystem(ship, asteroids, bullets)
 
-g = Genome(51, 5)
+g = Genome(51, 4)
 g.connectNodes()
 
 while not done:
@@ -36,7 +36,7 @@ while not done:
             if event.type == pygame.QUIT:
                 done = True
             if playerIsHuman and event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                bullets.extend([ship.shoot()])
+                bullets.extend(ship.shoot())
 
     if playerIsHuman:
         pressed = pygame.key.get_pressed()
@@ -57,12 +57,11 @@ while not done:
                 input.append(0)
 
         output = g.feedforward(input)
-        choice = output.index(max(output))
 
-        if choice == 0: bullets.append(ship.shoot())
-        if choice == 1: ship.rotateLeft()
-        if choice == 2: ship.rotateRight()
-        if choice == 3: ship.boost()
+        if output[0] > 0.5: bullets.extend(ship.shoot())
+        if output[1] > 0.5: ship.rotateLeft()
+        if output[2] > 0.5: ship.rotateRight()
+        if output[3] > 0.5: ship.boost()
 
     ship.update()
     for bullet in bullets: bullet.update()

@@ -1,3 +1,5 @@
+import random
+
 class Species:
     def __init__(self, firstGenome):
         self.EXCESS_COEFF = 1.5
@@ -70,3 +72,16 @@ class Species:
     def fitnessSharing(self):
         for genome in self.genomes:
             genome.fitness /= len(self.genomes)
+
+    def getRandomGenome(self):
+        fitnessSum = 0
+        for genome in self.genomes:
+            fitnessSum += genome.fitness
+
+        rand = random.randint(1, fitnessSum)
+        runningSum = 0
+
+        for genome in self.genomes:
+            runningSum += genome.fitness
+            if runningSum > rand:
+                return genome

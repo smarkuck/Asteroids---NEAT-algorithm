@@ -20,6 +20,6 @@ class Node:
         return 1 / (1 + math.exp(-z))
 
     def clone(self):
-        node = Node()
+        node = Node(self.number)
         node.layer = self.layer
         return node

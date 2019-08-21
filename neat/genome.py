@@ -11,6 +11,7 @@ class Genome:
         self.nodes = []
         self.connections = []
         self.feedforwardNodeOrder = []
+        self.fitness = 0
 
         for i in range(inputSize):
             node = Node(self.nextNodeNumber)

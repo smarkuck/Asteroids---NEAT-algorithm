@@ -155,3 +155,59 @@ class Genome:
             self.layers += 1
 
         self.connectNodes()
+
+    def findConnection(self, genome, innovationNumber):
+        for connection in genome.connections:
+            if connection.innovationNumber == innovationNumber:
+                return connection
+        return None
+
+    def getNode(self, number):
+        for node in self.nodes:
+            if node.number == number:
+                return node
+        return None
+
+    def crossover(self, genome):
+        child = Genome(self.inputSize, self.outputSize)
+        del child.nodes[:]
+        del child.connections[:]
+        del child.feedforwardNodeOrder[:]
+        child.layers = self.layers
+        child.nextNodeNumber = self.nextNodeNumber
+        child.fitness = 0
+
+        childConnections = []
+        isEnabled = []
+
+        for connection in self.connections:
+            setEnabled = True
+
+            secondParentConnection = self.findConnection(genome, connection.innovationNumber)
+            if secondParentConnection is not None:
+                if not connection.isEnabled or not secondParentConnection.isEnabled:
+                    if random.random() < 0.75:
+                        setEnabled = False
+
+                if random.random() < 0.5:
+                    childConnections.append(connection)
+                else:
+                    childConnections.append(secondParentConnection)
+
+            else:
+                childConnections.append(connection)
+                setEnabled = connection.isEnabled
+
+            isEnabled.append(setEnabled)
+
+        for node in self.nodes:
+            child.nodes.append(node.clone())
+
+        for i in range(len(childConnections)):
+            child.connections.append(childConnections[i].clone(
+                child.getNode(childConnections[i].inputNode.number),
+                child.getNode(childConnections[i].outputNode.number)))
+            child.connections[i].isEnabled = isEnabled[i]
+
+        child.connectNodes()
+        return child

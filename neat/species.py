@@ -78,10 +78,25 @@ class Species:
         for genome in self.genomes:
             fitnessSum += genome.fitness
 
-        rand = random.randint(1, fitnessSum)
+        rand = random.randint(0, fitnessSum)
         runningSum = 0
 
         for genome in self.genomes:
             runningSum += genome.fitness
-            if runningSum > rand:
+            if runningSum >= rand:
                 return genome
+
+    def createGenome(self, innovationHistory):
+        if random.random() < 0.25:
+            genome = self.getRandomGenome().clone()
+        else:
+            parent1 = self.getRandomGenome()
+            parent2 = self.getRandomGenome()
+
+            if parent1.fitness > parent2.fitness:
+                genome = parent1.crossover(parent2)
+            else:
+                genome = parent2.crossover(parent1)
+
+        genome.mutate(innovationHistory)
+        return genome

@@ -211,3 +211,23 @@ class Genome:
 
         child.connectNodes()
         return child
+
+    def clone(self):
+        clone = Genome(self.inputSize, self.outputSize)
+        del clone.nodes[:]
+        del clone.connections[:]
+        del clone.feedforwardNodeOrder[:]
+
+        for node in self.nodes:
+            clone.nodes.append(node.clone())
+
+        for connection in self.connections:
+            clone.connections.append(connection.clone(clone.getNode(connection.inputNode.number), clone.getNode(connection.outputNode.number)))
+
+        clone.layers = self.layers
+        clone.nextNodeNumber = self.nextNodeNumber
+        clone.fitness = 0
+
+        clone.connectNodes()
+
+        return clone

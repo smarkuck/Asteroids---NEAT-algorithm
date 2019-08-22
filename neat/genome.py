@@ -1,6 +1,7 @@
+import random
 from node import Node
 from connection import Connection
-import random
+from innovation import Innovation
 
 class Genome:
     def __init__(self, inputSize, outputSize):
@@ -59,3 +60,98 @@ class Genome:
             node.input = 0
 
         return output
+
+    def mutate(self, innovationHistory):
+        rnd = random.random()
+        if rnd < 0.8:
+            for connection in self.connections:
+                connection.mutate()
+
+        rnd = random.random()
+        if rnd < 0.05:
+            self.addConnection(innovationHistory)
+
+        rnd = random.random()
+        if rnd < 0.03:
+            self.addNode(innovationHistory)
+
+    def addConnection(self, innovationHistory):
+        if self.fullyConnected():
+            print "fully connected"
+            return
+
+        randomNode1 = self.nodes[random.randrange(0, len(self.nodes))]
+        randomNode2 = self.nodes[random.randrange(0, len(self.nodes))]
+
+        while randomNode1.layer == randomNode2.layer or randomNode1.isConnectedTo(randomNode2):
+            randomNode1 = self.nodes[random.randrange(0, len(self.nodes))]
+            randomNode2 = self.nodes[random.randrange(0, len(self.nodes))]
+
+        if randomNode1.layer > randomNode2.layer:
+            tmp = randomNode1
+            randomNode1 = randomNode2
+            randomNode2 = tmp
+
+        connectionInnovationNumber = self.getInnovationNumber(innovationHistory, randomNode1, randomNode2)
+        self.connections.append(Connection(randomNode1, randomNode2, random.random() * 2 - 1, connectionInnovationNumber))
+        self.connectNodes()
+
+    def fullyConnected(self):
+        maxConnections = 0
+        nodesInLayers = [0] * self.layers
+
+        for node in self.nodes:
+            nodesInLayers[node.layer] += 1
+
+        for i in range(self.layers - 1):
+            nodesInFront = 0
+            for j in range(i + 1, self.layers):
+                nodesInFront += nodesInLayers[j]
+
+            maxConnections += nodesInLayers[i] * nodesInFront
+
+        return True if maxConnections == len(self.connections) else False
+
+    def getInnovationNumber(self, innovationHistory, inputNode, outputNode):
+        isNew = True
+        connectionInnovationNumber = innovationHistory.nextInnovationNumber
+
+        for innovation in innovationHistory.innovations:
+            if innovation.matches(self, inputNode, outputNode):
+                isNew = False
+                connectionInnovationNumber = innovation.number
+                break
+
+        if isNew:
+            innovationNumbers = []
+            for connection in self.connections:
+                innovationNumbers.append(connection.innovationNumber)
+
+            innovationHistory.innovations.append(Innovation(inputNode.number, outputNode.number, connectionInnovationNumber, innovationNumbers))
+            innovationHistory.nextInnovationNumber += 1
+
+        return connectionInnovationNumber
+
+    def addNode(self, innovationHistory):
+        randomConnection = self.connections[random.randrange(0, len(self.connections))]
+        randomConnection.isEnabled = False
+
+        newNodeNumber = self.nextNodeNumber
+        newNode = Node(newNodeNumber)
+        self.nodes.append(newNode)
+        self.nextNodeNumber += 1
+
+        connectionInnovationNumber = self.getInnovationNumber(innovationHistory, randomConnection.inputNode, newNode)
+        self.connections.append(Connection(randomConnection.inputNode, newNode, 1, connectionInnovationNumber))
+
+        connectionInnovationNumber = self.getInnovationNumber(innovationHistory, newNode, randomConnection.outputNode)
+        self.connections.append(Connection(newNode, randomConnection.outputNode, randomConnection.weight, connectionInnovationNumber))
+        newNode.layer = randomConnection.inputNode.layer + 1
+
+        if newNode.layer == randomConnection.outputNode.layer:
+            for i in range(len(self.nodes) - 1):
+                if self.nodes[i].layer >= newNode.layer:
+                    self.nodes[i].layer += 1
+            self.layers += 1
+
+        self.connectNodes()

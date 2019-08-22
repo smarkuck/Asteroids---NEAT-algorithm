@@ -23,3 +23,15 @@ class Node:
         node = Node(self.number)
         node.layer = self.layer
         return node
+
+    def isConnectedTo(self, node):
+        if node.layer == self.layer: return False
+
+        if node.layer < self.layer:
+            for connection in node.outputConnections:
+                if connection.outputNode == self: return True
+        else:
+            for connection in self.outputConnections:
+                if connection.outputNode == node: return True
+
+        return False

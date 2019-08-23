@@ -19,7 +19,7 @@ class Species:
         excessAndDisjoint = self.getExcessDisjoint(genome, self.champion)
         averageWeightDiff = self.averageWeightDiff(genome, self.champion)
 
-        compatibility = (self.excessCoeff * excessAndDisjoint) + (self.weightDiffCoeff * averageWeightDiff)
+        compatibility = (self.EXCESS_COEFF * excessAndDisjoint) + (self.WEIGHT_DIFF_COEFF * averageWeightDiff)
         return compatibility < self.COMPATIBILITY_THRESHOLD
 
     def getExcessDisjoint(self, genome1, genome2):
@@ -29,6 +29,7 @@ class Species:
                 if c1.innovationNumber == c2.innovationNumber:
                     matching += 1
                     break
+
         return len(genome1.connections) + len(genome2.connections) - 2 * matching
 
     def averageWeightDiff(self, genome1, genome2):
@@ -71,14 +72,14 @@ class Species:
 
     def fitnessSharing(self):
         for genome in self.genomes:
-            genome.fitness /= len(self.genomes)
+            genome.fitness /= float(len(self.genomes))
 
     def getRandomGenome(self):
         fitnessSum = 0
         for genome in self.genomes:
             fitnessSum += genome.fitness
 
-        rand = random.randint(0, fitnessSum)
+        rand = random.random() * fitnessSum
         runningSum = 0
 
         for genome in self.genomes:

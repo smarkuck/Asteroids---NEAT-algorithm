@@ -76,9 +76,7 @@ class Genome:
             self.addNode(innovationHistory)
 
     def addConnection(self, innovationHistory):
-        if self.fullyConnected():
-            print "fully connected"
-            return
+        if self.fullyConnected(): return
 
         randomNode1 = self.nodes[random.randrange(0, len(self.nodes))]
         randomNode2 = self.nodes[random.randrange(0, len(self.nodes))]

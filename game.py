@@ -1,6 +1,6 @@
 import pygame
 import colors
-from neat.genome import Genome
+from neat.population import Population
 
 from resolution import *
 from ship import Ship
@@ -13,7 +13,9 @@ class Game:
         self.isRendered = isRendered
         if genome is None:
             self.playerIsHuman = True
-        else: self.playerIsHuman = False
+        else:
+            self.playerIsHuman = False
+            self.genome = genome
 
     @classmethod
     def forHuman(cls):
@@ -35,10 +37,10 @@ class Game:
 
         bullets = []
         asteroids = []
-        asteroids.append(Asteroid(pygame.math.Vector2(SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4), 3, SHORT_SIDE * 0.1))
-        asteroids.append(Asteroid(pygame.math.Vector2(0, 0), 3, SHORT_SIDE * 0.1))
-        asteroids.append(Asteroid(pygame.math.Vector2(0, SCREEN_HEIGHT), 3, SHORT_SIDE * 0.1))
-        asteroids.append(Asteroid(pygame.math.Vector2(SCREEN_WIDTH, 0), 3, SHORT_SIDE * 0.1))
+        asteroids.append(Asteroid(pygame.math.Vector2(SCREEN_WIDTH * 3/4., SCREEN_HEIGHT * 3/4.), 3, SHORT_SIDE * 0.1))
+        asteroids.append(Asteroid(pygame.math.Vector2(SCREEN_WIDTH / 4., SCREEN_HEIGHT / 4.), 3, SHORT_SIDE * 0.1))
+        asteroids.append(Asteroid(pygame.math.Vector2(SCREEN_WIDTH / 4., SCREEN_HEIGHT * 3/4.), 3, SHORT_SIDE * 0.1))
+        asteroids.append(Asteroid(pygame.math.Vector2(SCREEN_WIDTH * 3/4., SCREEN_HEIGHT / 4.), 3, SHORT_SIDE * 0.1))
 
         collisionSystem = CollisionSystem(self, ship, asteroids, bullets)
 
@@ -76,7 +78,7 @@ class Game:
                     for i in range(toFill):
                         input.append(0)
 
-                output = g.feedforward(input)
+                output = genome.feedforward(input)
 
                 if output[0] > 0.5: bullets.extend(ship.shoot())
                 if output[1] > 0.5: ship.rotateLeft()
@@ -100,8 +102,10 @@ class Game:
 
         return self.score
 
-g = Genome(51, 4)
-g.connectNodes()
+p = Population(100)
+for i in range(100):
+    for genome in p.genomes:
+        genome.fitness = Game.forAI(genome, False).run()
+    p.naturalSelection()
 
-game = Game.forAI(g, False)
-print game.run()
+Game.forAI(p.bestGenome).run()

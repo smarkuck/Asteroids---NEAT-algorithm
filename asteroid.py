@@ -6,7 +6,7 @@ import random
 class Asteroid:
     def __init__(self, position, size, scale):
         self.SCALE = scale
-        self.VELOCITY = 0.005 * scale * pygame.math.Vector2(1, 0).rotate(random.random()*360) * 3/size
+        self.VELOCITY = 0.007 * scale * pygame.math.Vector2(1, 0).rotate(random.random()*360) * 3/size
         self.SIZE = size
         self.RADIUS = self.getRadius()
         self.LINE_WIDTH = 2

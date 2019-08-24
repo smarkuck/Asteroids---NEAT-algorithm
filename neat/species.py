@@ -18,8 +18,9 @@ class Species:
     def belongsTo(self, genome):
         excessAndDisjoint = self.getExcessDisjoint(genome, self.champion)
         averageWeightDiff = self.averageWeightDiff(genome, self.champion)
+        largeGenomeNormaliser = len(genome.connections)/100.
 
-        compatibility = (self.EXCESS_COEFF * excessAndDisjoint) + (self.WEIGHT_DIFF_COEFF * averageWeightDiff)
+        compatibility = (self.EXCESS_COEFF * excessAndDisjoint/largeGenomeNormaliser) + (self.WEIGHT_DIFF_COEFF * averageWeightDiff)
         return compatibility < self.COMPATIBILITY_THRESHOLD
 
     def getExcessDisjoint(self, genome1, genome2):
@@ -54,13 +55,17 @@ class Species:
             self.genomes[i] = self.genomes[maxIndex]
             self.genomes[maxIndex] = tmp
 
-        if self.genomes[0].fitness > self.bestFitness:
+        if len(self.genomes) > 0 and self.genomes[0].fitness > self.bestFitness:
             self.staleness = 0
             self.bestFitness = self.genomes[0].fitness
             self.champion = self.genomes[0]
         else: self.staleness += 1
 
     def setAverage(self):
+        if len(self.genomes) == 0:
+            self.averageFitness = 0
+            return
+
         sum = 0.0
         for genome in self.genomes:
             sum += genome.fitness

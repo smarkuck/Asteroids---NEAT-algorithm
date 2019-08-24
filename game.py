@@ -7,9 +7,14 @@ from ship import Ship
 from asteroid import Asteroid
 from collision_system import CollisionSystem
 
+import random
+
 class Game:
     def __init__(self, genome, isRendered):
-        self.score = 0
+        self.score = 0.0
+        self.time = 0.0
+        self.shoots = 0.0
+
         self.isRendered = isRendered
         if genome is None:
             self.playerIsHuman = True
@@ -37,10 +42,22 @@ class Game:
 
         bullets = []
         asteroids = []
-        asteroids.append(Asteroid(pygame.math.Vector2(SCREEN_WIDTH * 3/4., SCREEN_HEIGHT * 3/4.), 3, SHORT_SIDE * 0.1))
-        asteroids.append(Asteroid(pygame.math.Vector2(SCREEN_WIDTH / 4., SCREEN_HEIGHT / 4.), 3, SHORT_SIDE * 0.1))
-        asteroids.append(Asteroid(pygame.math.Vector2(SCREEN_WIDTH / 4., SCREEN_HEIGHT * 3/4.), 3, SHORT_SIDE * 0.1))
-        asteroids.append(Asteroid(pygame.math.Vector2(SCREEN_WIDTH * 3/4., SCREEN_HEIGHT / 4.), 3, SHORT_SIDE * 0.1))
+        for i in range(4):
+            rnd = random.random()
+            if rnd < 0.25:
+                rnd_x = random.randint(0, 200)
+                rnd_y = random.randint(0, 600)
+            elif rnd < 0.5:
+                rnd_x = random.randint(600, 800)
+                rnd_y = random.randint(0, 600)
+            elif rnd < 0.75:
+                rnd_x = random.randint(0, 800)
+                rnd_y = random.randint(0, 150)
+            else:
+                rnd_x = random.randint(0, 800)
+                rnd_y = random.randint(450, 600)
+
+            asteroids.append(Asteroid(pygame.math.Vector2(rnd_x, rnd_y), 3, SHORT_SIDE * 0.1))
 
         collisionSystem = CollisionSystem(self, ship, asteroids, bullets)
 
@@ -57,6 +74,7 @@ class Game:
                         done = True
                     if self.playerIsHuman and event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                         bullets.extend(ship.shoot())
+                        self.shoots += 1
 
             if self.playerIsHuman:
                 pressed = pygame.key.get_pressed()
@@ -73,14 +91,16 @@ class Game:
                                   asteroid.RADIUS / SCREEN_WIDTH])
 
                 inputSize = len(input)
-                if inputSize < 51:
-                    toFill = 51 - inputSize
+                if inputSize < 147:
+                    toFill = 147 - inputSize
                     for i in range(toFill):
                         input.append(0)
 
-                output = genome.feedforward(input)
+                output = self.genome.feedforward(input)
 
-                if output[0] > 0.5: bullets.extend(ship.shoot())
+                if output[0] > 0.5:
+                    bullets.extend(ship.shoot())
+                    self.shoots += 1
                 if output[1] > 0.5: ship.rotateLeft()
                 if output[2] > 0.5: ship.rotateRight()
                 if output[3] > 0.5: ship.boost()
@@ -88,6 +108,9 @@ class Game:
             ship.update()
             for bullet in bullets: bullet.update()
             for asteroid in asteroids: asteroid.update()
+            self.time += 1
+            if not self.playerIsHuman and self.time >= 4000:
+                done = True
 
             collisionSystem.checkCollisions()
 
@@ -100,12 +123,19 @@ class Game:
                 pygame.display.flip()
                 clock.tick(60)
 
-        return self.score
+        fitness = self.score
+        if self.shoots > 0: fitness += self.score/self.shoots * 68
+        if self.time > 0: fitness += self.score * (1 - self.time/4000)
+        return fitness
 
 p = Population(100)
-for i in range(100):
+for i in range(10):
     for genome in p.genomes:
-        genome.fitness = Game.forAI(genome, False).run()
+        for i in range(5):
+            genome.fitness += Game.forAI(genome, False).run()/5
+    print "======================================================="
+    print "best fitness: %s" % max([g.fitness for g in p.genomes])
     p.naturalSelection()
 
-Game.forAI(p.bestGenome).run()
+raw_input("Press Enter to continue...")
+Game.forAI(p.champion).run()

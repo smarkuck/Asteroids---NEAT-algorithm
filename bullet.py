@@ -4,7 +4,7 @@ import colors
 
 class Bullet:
     def __init__(self, position, rotation, scale):
-        self.VELOCITY = 0.3 * scale
+        self.VELOCITY = 0.2 * scale
         self.RADIUS = 0.05 * scale
         self.LIFE_DECREASE_RATE = 1
 

@@ -6,7 +6,7 @@ import random
 class Asteroid:
     def __init__(self, position, size, scale):
         self.SCALE = scale
-        self.VELOCITY = 0.007 * scale * pygame.math.Vector2(1, 0).rotate(random.random()*360) * 3/size
+        self.VELOCITY = 0.008 * scale * pygame.math.Vector2(1, 0).rotate(random.random()*360) * 3/size
         self.SIZE = size
         self.RADIUS = self.getRadius()
         self.LINE_WIDTH = 2
@@ -51,8 +51,14 @@ class Asteroid:
 
     def destroy(self):
         self.alive = False
-        if self.SIZE > 1:
+        if self.SIZE == 3:
             return [Asteroid(self.position, self.SIZE - 1, self.SCALE),
+                    Asteroid(self.position, self.SIZE - 1, self.SCALE),
+                    Asteroid(self.position, self.SIZE - 1, self.SCALE),
+                    Asteroid(self.position, self.SIZE - 1, self.SCALE)]
+        elif self.SIZE == 2:
+            return [Asteroid(self.position, self.SIZE - 1, self.SCALE),
+                    Asteroid(self.position, self.SIZE - 1, self.SCALE),
                     Asteroid(self.position, self.SIZE - 1, self.SCALE)]
         else:
             return []

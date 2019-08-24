@@ -11,10 +11,10 @@ class Population:
         self.bestFitness = 0
         self.generation = 0
         self.species = []
-        self.innovationHistory = InnovationHistory(51 * 4)
+        self.innovationHistory = InnovationHistory(147 * 4)
 
         for i in range(size):
-            self.genomes.append(Genome(51, 4))
+            self.genomes.append(Genome(147, 4))
             self.genomes[i].connectNodes()
 
     def speciate(self):
@@ -98,5 +98,8 @@ class Population:
         self.genomes = nextGeneration
         self.generation += 1
 
-        print "generation: %s, mutations: %s, species: %s, bestFitness: %s" %\
-              (self.generation, len(self.innovationHistory.innovations), len(self.species), self.bestFitness)
+        print "champion data - nodes: %s, connections: %s, fitness: %s" % (len(self.champion.nodes), len(self.champion.connections), self.bestFitness)
+        print "genomes in species:"
+        for s in self.species: print len(s.genomes)
+        print "generation: %s, mutations: %s, species: %s" %\
+              (self.generation, len(self.innovationHistory.innovations), len(self.species))

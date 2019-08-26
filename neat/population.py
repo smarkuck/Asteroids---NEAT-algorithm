@@ -11,10 +11,10 @@ class Population:
         self.bestFitness = 0
         self.generation = 0
         self.species = []
-        self.innovationHistory = InnovationHistory(147 * 4)
+        self.innovationHistory = InnovationHistory(32 * 4)
 
         for i in range(size):
-            self.genomes.append(Genome(147, 4))
+            self.genomes.append(Genome(32, 4))
             self.genomes[i].connectNodes()
 
     def speciate(self):

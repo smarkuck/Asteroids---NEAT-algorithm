@@ -7,6 +7,8 @@ from ship import Ship
 from asteroid import Asteroid
 from collision_system import CollisionSystem
 
+import math
+
 import random
 
 class Game:
@@ -76,6 +78,41 @@ class Game:
                         bullets.extend(ship.shoot())
                         self.shoots += 1
 
+            input = [0] * 32
+            for i in range(32):
+                min_dist = SCREEN_WIDTH * 2
+                for asteroid in asteroids:
+                    vision = pygame.math.Vector2(100, 0).rotate(ship.rotation + i * 11.25)
+                    a = pygame.math.Vector2(asteroid.position)
+                    if ship.position.x - ship.RADIUS > asteroid.position.x + asteroid.RADIUS and vision.x > 0:
+                        a.x += SCREEN_WIDTH + asteroid.RADIUS * 2
+                    elif ship.position.x + ship.RADIUS < asteroid.position.x - asteroid.RADIUS and vision.x < 0:
+                        a.x -= SCREEN_WIDTH + asteroid.RADIUS * 2
+                    if ship.position.y - ship.RADIUS > asteroid.position.y + asteroid.RADIUS and vision.y > 0:
+                        a.y += SCREEN_HEIGHT + asteroid.RADIUS * 2
+                    elif ship.position.y + ship.RADIUS < asteroid.position.y - asteroid.RADIUS and vision.y < 0:
+                        a.y -= SCREEN_HEIGHT + asteroid.RADIUS * 2
+
+                    if vision.x == 0:
+                        D = abs(ship.position.x - a.x)
+                        p = pygame.math.Vector2(ship.position.x, a.y)
+                    else:
+                        D = abs(vision.y/vision.x*a.x - a.y + ship.position.y - vision.y*ship.position.x/vision.x) / math.sqrt((vision.y/vision.x)**2 + 1)
+                        if vision.y == 0: p = pygame.math.Vector2(a.x, ship.position.y)
+                        else:
+                            a1 = vision.y/vision.x
+                            b1 = ship.position.y - vision.y*ship.position.x/vision.x
+                            a2 = -vision.x/vision.y
+                            b2 = a.y + vision.x*a.x/vision.y
+                            p = pygame.math.Vector2((b2 - b1)/(a1 - a2), (a1*b2 - a2*b1)/(a1 - a2))
+
+                    if D <= asteroid.RADIUS:
+                        x = math.sqrt(asteroid.RADIUS**2 - D**2)
+                        dist = ship.position.distance_to(p) - x
+                        if dist < min_dist: min_dist = dist
+
+                input[i] = min_dist/(SCREEN_WIDTH * 2)
+
             if self.playerIsHuman:
                 pressed = pygame.key.get_pressed()
                 if pressed[pygame.K_LEFT]: ship.rotateLeft()
@@ -83,19 +120,6 @@ class Game:
                 if pressed[pygame.K_UP]: ship.boost()
 
             else:
-                input = []
-                input.extend(
-                    [ship.position.x / SCREEN_WIDTH, ship.position.y / SCREEN_WIDTH, ship.RADIUS / SCREEN_WIDTH])
-                for asteroid in asteroids:
-                    input.extend([asteroid.position.x / SCREEN_WIDTH, asteroid.position.y / SCREEN_WIDTH,
-                                  asteroid.RADIUS / SCREEN_WIDTH])
-
-                inputSize = len(input)
-                if inputSize < 147:
-                    toFill = 147 - inputSize
-                    for i in range(toFill):
-                        input.append(0)
-
                 output = self.genome.feedforward(input)
 
                 if output[0] > 0.5:
@@ -125,17 +149,17 @@ class Game:
 
         fitness = self.score
         if self.shoots > 0: fitness += self.score/self.shoots * 68
-        if self.time > 0: fitness += self.score * (1 - self.time/4000)
+        fitness += self.time/4000 * 68
         return fitness
 
-p = Population(100)
-for i in range(10):
+p = Population(300)
+for i in range(100):
     for genome in p.genomes:
-        for i in range(5):
+        for j in range(5):
             genome.fitness += Game.forAI(genome, False).run()/5
     print "======================================================="
     print "best fitness: %s" % max([g.fitness for g in p.genomes])
     p.naturalSelection()
 
-raw_input("Press Enter to continue...")
+raw_input("Press Enter")
 Game.forAI(p.champion).run()

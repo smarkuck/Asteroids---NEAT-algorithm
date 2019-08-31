@@ -13,6 +13,7 @@ class Genome:
         self.connections = []
         self.feedforwardNodeOrder = []
         self.fitness = 0
+        self.score = 0
 
         for i in range(inputSize):
             node = Node(self.nextNodeNumber)
@@ -225,6 +226,7 @@ class Genome:
         clone.layers = self.layers
         clone.nextNodeNumber = self.nextNodeNumber
         clone.fitness = 0
+        clone.score = 0
 
         clone.connectNodes()
 

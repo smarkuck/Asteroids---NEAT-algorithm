@@ -8,7 +8,7 @@ class Population:
     def __init__(self, size):
         self.genomes = []
         self.champion = None
-        self.bestFitness = 0
+        self.bestScore = -1
         self.generation = 0
         self.species = []
         self.innovationHistory = InnovationHistory(32 * 4)
@@ -51,8 +51,8 @@ class Population:
 
     def setChampion(self):
         candidate = self.species[0].champion
-        if candidate.fitness > self.bestFitness:
-            self.bestFitness = candidate.fitness
+        if candidate.score > self.bestScore:
+            self.bestScore = candidate.score
             self.champion = candidate.clone()
 
     def killStaleSpecies(self):
@@ -98,7 +98,7 @@ class Population:
         self.genomes = nextGeneration
         self.generation += 1
 
-        print "champion data - nodes: %s, connections: %s, fitness: %s" % (len(self.champion.nodes), len(self.champion.connections), self.bestFitness)
+        print "champion data - nodes: %s, connections: %s, best score: %s" % (len(self.champion.nodes), len(self.champion.connections), self.bestScore)
         print "genomes in species:"
         for s in self.species: print len(s.genomes)
         print "generation: %s, mutations: %s, species: %s" %\

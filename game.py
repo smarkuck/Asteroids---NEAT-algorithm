@@ -150,16 +150,19 @@ class Game:
         fitness = self.score
         if self.shoots > 0: fitness += self.score/self.shoots * 68
         fitness += self.time/4000 * 68
-        return fitness
+        return [fitness, self.score]
 
 p = Population(300)
 for i in range(100):
     for genome in p.genomes:
         for j in range(5):
-            genome.fitness += Game.forAI(genome, False).run()/5
+            result = Game.forAI(genome, False).run()
+            genome.fitness += result[0]/5
+            if result[1] > genome.score: genome.score = result[1]
     print "======================================================="
     print "best fitness: %s" % max([g.fitness for g in p.genomes])
     p.naturalSelection()
 
-raw_input("Press Enter")
-Game.forAI(p.champion).run()
+while True:
+    raw_input("Press Enter")
+    Game.forAI(p.champion).run()
